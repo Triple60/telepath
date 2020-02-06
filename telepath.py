@@ -5,8 +5,17 @@
 @dataMaintainers HKN's Computing Services Committee, https://hkn.eecs.berkeley.edu/about/officers
 """
 
-import urllib.request, json
+import urllib.request, json, sys
 # import datetime, time
+
+# To get extended output, put 1 (or any other nonzero number) as an argument, as:
+#   python3 telepath.py 1
+# To get basic output, put nothing or 0 as an argument.
+
+if (len(sys.argv) - 1 == 1):
+    PRINTALL = int(sys.argv[1])
+else :
+    PRINTALL = False
 
 serverData = json.loads(urllib.request.urlopen("https://www.ocf.berkeley.edu/~hkn/hivemind/data/latest.json").read().decode())
 serverData = serverData['data']
@@ -73,8 +82,7 @@ def format(serverDict, sortKeyword='id'):
     # Now, sort the list based on the sorting function
     serverList.sort(key=sortFunction)
 
-    for server in serverList:
-        print(server)
+    return serverList
 
 def cleanTime(seconds):
     hours = seconds // (60 * 60)
@@ -84,7 +92,13 @@ def cleanTime(seconds):
 
 # print(datetime.datetime.now().time())
 # print(time.time())
-format(bestServers, 'uptime')
+allServers = format(bestServers, 'uptime')
+
+if PRINTALL:
+    for server in allServers:
+        print(server)
+else :
+    print(allServers[0].name[4:-3])
 
 """
 Note on 1/31/2020, 4:22 PM: 'uptime' is definitely measured in seconds.
