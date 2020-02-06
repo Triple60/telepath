@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ $1 ]
+	then user=$1
+	else
+		echo "What's your CS61C 3-letter login?"
+		read user
+fi
+
+telepathOut=$(python3 your/path/to/telepath.py)
+ssh cs61c-$user@hive$telepathOut.cs.berkeley.edu
