@@ -40,12 +40,11 @@ else
 fi
 
 properLogin $user
-while [[ $isProperLogin == 1 ]]
-do
+if [[ $isProperLogin == 1 ]]
+then
 	echo "Please enter a 3-letter login."
-	read user
-	properLogin $user
-done
+	exit 1
+fi
 
 echo "Login $user received, attempting to connect..."
 
