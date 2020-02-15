@@ -6,7 +6,6 @@
 """
 
 import urllib.request, json, sys
-# import datetime, time
 
 # To get extended output, put 1 (or any other nonzero number) as an argument, as:
 #   python3 telepath.py 1
@@ -17,10 +16,11 @@ if (len(sys.argv) - 1 == 1):
 else :
     PRINTALL = False
 
-serverData = json.loads(urllib.request.urlopen("https://www.ocf.berkeley.edu/~hkn/hivemind/data/latest.json").read().decode())
-serverData = serverData['data']
-
 def onlyHive(fullData):
+    """
+    Parses the fullData set and returns only those servers with "hive" in their name.
+    This could probably be generalized to return other machines like those in Soda.
+    """
     toReturn = {}
     for server in fullData:
         if str(server)[0:4] == "hive":
@@ -28,7 +28,14 @@ def onlyHive(fullData):
     
     return toReturn
 
-serverData = onlyHive(serverData)
+def cleanTime(seconds):
+    """
+    A function used for more detailed input that converts a time in seconds to hh:mm:ss.
+    """
+    hours = seconds // (60 * 60)
+    minutes = (seconds % 60 * 60) // 60
+    seconds = (seconds % 60)
+    return str(hours)[:-2] + ":" + str(minutes)[:-2] + ":" + str(seconds)[0:5]
 
 def findBestServer(hiveData):
     """
@@ -53,8 +60,6 @@ def findBestServer(hiveData):
     
     bestCPU = findMin((lambda x, dataSet: dataSet[x]['load_avgs'][1]), hiveData)    # First, get the best servers by lowest average CPU usage, as Hivemind's code does
     return findMin((lambda x, dataSet: len(dataSet[x]['users'])), bestCPU)          # Then, get the best servers by fewest number of online users
-
-bestServers = findBestServer(serverData)
 
 def format(serverDict, sortKeyword='id'):
     """
@@ -84,14 +89,11 @@ def format(serverDict, sortKeyword='id'):
 
     return serverList
 
-def cleanTime(seconds):
-    hours = seconds // (60 * 60)
-    minutes = (seconds % 60 * 60) // 60
-    seconds = (seconds % 60)
-    return str(hours)[:-2] + ":" + str(minutes)[:-2] + ":" + str(seconds)[0:5]
+serverData = json.loads(urllib.request.urlopen("https://www.ocf.berkeley.edu/~hkn/hivemind/data/latest.json").read().decode())
+serverData = serverData['data']
 
-# print(datetime.datetime.now().time())
-# print(time.time())
+serverData = onlyHive(serverData)
+bestServers = findBestServer(serverData)
 allServers = format(bestServers, 'uptime')
 
 if PRINTALL:
@@ -99,29 +101,3 @@ if PRINTALL:
         print(server)
 else :
     print(allServers[0].name[4:-3])
-
-"""
-Note on 1/31/2020, 4:22 PM: 'uptime' is definitely measured in seconds.
-
-16:08:49.708358
-1580515729.7094128
-hive10 (0.0% mean CPU load, [] users online, up for 1990847.37 seconds)
-hive19 (0.0% mean CPU load, [] users online, up for 86882.45 seconds)
-hive9 (0.0% mean CPU load, [] users online, up for 15730.67 seconds)
-
-16:19:57.909603
-1580516397.9111762
-hive17 (0.0% mean CPU load, [] users online, up for 87544.09 seconds)
-hive18 (0.0% mean CPU load, [] users online, up for 20362.93 seconds)
-hive19 (0.0% mean CPU load, [] users online, up for 87542.54 seconds)
-hive20 (0.0% mean CPU load, [] users online, up for 183525.98 seconds)
-hive22 (0.0% mean CPU load, [] users online, up for 4270.56 seconds)
-hive23 (0.0% mean CPU load, [] users online, up for 6549.33 seconds)
-hive8 (0.0% mean CPU load, [] users online, up for 349888.53 seconds)
-hive9 (0.0% mean CPU load, [] users online, up for 16390.19 seconds)
-"""
-
-"""
-Todo:
-Implement in command-line-runnable file
-"""

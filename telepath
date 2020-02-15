@@ -1,11 +1,58 @@
 #!/bin/bash
 
-if [ $1 ]
-	then user=$1
+# @author Ayush Sharma
+
+function checkString() {
+	if [[ $1 =~ ^[A-Za-z]+$ ]]
+	then
+		isAllLetters=0
 	else
-		echo "What's your CS61C 3-letter login?"
-		read user
+		isAllLetters=1
+	fi
+}
+
+function threeLetters() {
+	if [[ ${#1} == 3 ]]
+	then
+		isLengthThree=0
+	else
+		isLengthThree=1
+	fi
+}
+
+function properLogin() {
+	checkString $1
+	threeLetters $1
+	if [[ ( $isAllLetters == 1 ) || ( $isLengthThree == 1 ) ]]
+	then
+		isProperLogin=1
+	else
+		isProperLogin=0
+	fi
+}
+
+if [ $1 ]
+then
+	user=$1
+else
+	echo "What's your CS61C 3-letter login (cs61c-xxx)?"
+	read user
 fi
 
-telepathOut=$(python3 your/path/to/telepath.py)
+properLogin $user
+while [[ $isProperLogin == 1 ]]
+do
+	echo "Please enter a 3-letter login."
+	read user
+	properLogin $user
+done
+
+echo "Login $user received, attempting to connect..."
+
+: '
+Please fill out the below line, filling in the following:
+	a) The command you use to execute Python (e.g., python3, py, python)
+	b) The path to your telepath.py file
+'
+telepathOut=$(python3/py/python your/path/to/telepath.py)
 ssh cs61c-$user@hive$telepathOut.cs.berkeley.edu
